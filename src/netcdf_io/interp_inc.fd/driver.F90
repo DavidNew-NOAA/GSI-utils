@@ -76,12 +76,14 @@
  real(8), allocatable :: rlon(:), rlat(:), crot(:), srot(:)
  real(8), allocatable :: gi(:,:), gi2(:,:), go(:,:), go2(:,:), go3(:,:)
 
-
+ logical :: jedi = .false.
+ character(len=11) :: ice_inc_name
+ 
  ! NOTE: u_inc,v_inc must be consecutive
  data records /'u_inc', 'v_inc', 'delp_inc', 'delz_inc', 'T_inc', &
                'sphum_inc', 'liq_wat_inc', 'o3mr_inc', 'icmr_inc' /
 
- namelist /setup/ lon_out, lat_out, outfile, infile, lev
+ namelist /setup/ lon_out, lat_out, outfile, infile, lev, jedi
 
 
 !-----------------------------------------------------------------
@@ -114,6 +116,12 @@ call mpi_comm_size(mpi_comm_world, npes, mpierr)
  dlondeg = 360.0_8 / real(lon_out,8)
 
  ilev=lev+1
+
+ if ( jedi ) then
+    ice_inc_name = 'icmr_inc'
+ else
+    ice_inc_name = 'ice_wat_inc'
+ end if
 
  call mpi_barrier(mpi_comm_world, mpierr)
  if (mype == npes-1) then
@@ -185,8 +193,8 @@ call mpi_comm_size(mpi_comm_world, npes, mpierr)
    error = nf90_def_var(ncid_out, 'o3mr_inc', nf90_float, (/dim_lon_out,dim_lat_out,dim_lev_out/), id_o3mr_inc_out)
    call netcdf_err(error, 'defining variable o3mr_inc for file='//trim(outfile) )
   
-   error = nf90_def_var(ncid_out, 'icmr_inc', nf90_float, (/dim_lon_out,dim_lat_out,dim_lev_out/), id_icmr_inc_out)
-   call netcdf_err(error, 'defining variable icmr_inc for file='//trim(outfile) )
+   error = nf90_def_var(ncid_out, trim(ice_inc_name), nf90_float, (/dim_lon_out,dim_lat_out,dim_lev_out/), id_icmr_inc_out)
+   call netcdf_err(error, 'defining variable ' // trim(ice_inc_name) // ' for file='//trim(outfile) )
   
    error = nf90_put_att(ncid_out, nf90_global, 'source', 'GSI')
    call netcdf_err(error, 'defining source attribute for file='//trim(outfile) )

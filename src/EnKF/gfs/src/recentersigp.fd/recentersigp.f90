@@ -291,6 +291,9 @@ program recentersigp
               case ('icmr_inc')
                  call read_vardata(dsetmg,'icmr',values_3d_mb)
                  call read_vardata(dsetmo,'icmr',values_3d_anl)
+              case ('ice_wat_inc')
+                 call read_vardata(dsetmg,'icmr',values_3d_mb)
+                 call read_vardata(dsetmo,'icmr',values_3d_anl)
               end select
               values_3d(:,:,:) = zero
               do j=1,latb
