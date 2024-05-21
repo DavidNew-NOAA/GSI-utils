@@ -79,13 +79,23 @@
  logical :: jedi = .false.
  character(len=11) :: ice_inc_name
  
- ! NOTE: u_inc,v_inc must be consecutive
- data records /'u_inc', 'v_inc', 'delp_inc', 'delz_inc', 'T_inc', &
-               'sphum_inc', 'liq_wat_inc', 'o3mr_inc', 'icmr_inc' /
-
  namelist /setup/ lon_out, lat_out, outfile, infile, lev, jedi
 
+!----------------------------------------------------------------
+! Set increment variable names.
+!----------------------------------------------------------------
 
+ ! GSI and JEDI may use difference increment variable names
+ if ( jedi ) then
+    ice_inc_name = 'icmr_inc'
+ else
+    ice_inc_name = 'ice_wat_inc'
+ end if
+ 
+ ! NOTE: u_inc,v_inc must be consecutive
+ records = (/'u_inc', 'v_inc', 'delp_inc', 'delz_inc', 'T_inc', &
+             'sphum_inc', 'liq_wat_inc', 'o3mr_inc', ice_inc_name /)
+ 
 !-----------------------------------------------------------------
 ! MPI initialization
 call mpi_init(mpierr)
@@ -116,12 +126,6 @@ call mpi_comm_size(mpi_comm_world, npes, mpierr)
  dlondeg = 360.0_8 / real(lon_out,8)
 
  ilev=lev+1
-
- if ( jedi ) then
-    ice_inc_name = 'icmr_inc'
- else
-    ice_inc_name = 'ice_wat_inc'
- end if
 
  call mpi_barrier(mpi_comm_world, mpierr)
  if (mype == npes-1) then
