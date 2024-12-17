@@ -347,14 +347,16 @@ contains
     real, allocatable, dimension(:,:,:) :: work3d_inc
     real, allocatable, dimension(:,:) :: ps_inc, work2d
     real, allocatable, dimension(:) :: bk5, work1d
-    integer :: iret, j, jj
+    integer :: iret, j, jj, k
     type(Dataset) :: incncfile
 
     ! get bk5 from attributes
     call read_attribute(fcstncfile, 'bk', bk5)
     ! read in delp increment to get ps increment
     incncfile = open_dataset(incr_file)
-    call read_vardata(incncfile, 'delp_inc', work3d_inc)
+    do k=1,nlev
+       call read_vardata(incncfile, 'delp_inc', work3d_inc, nslice=k, slicedim=3)
+    enddo
     ! get ps increment from delp increment and bk
     allocate(ps_inc(nlon,nlat))
     ps_inc(:,:) = work3d_inc(:,:,nlev) / (bk5(nlev) - bk5(nlev-1))
